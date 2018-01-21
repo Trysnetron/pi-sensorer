@@ -36,7 +36,7 @@ channel ADC without need for any input to initiate sampling.
 /////// USER SHOULD MAKE SURE THESE DEFINES CORRESPOND TO THEIR SETUP ///////
 #define ADCS 5      // Number of connected MCP3201.
 
-#define OUTPUT_DATA "/mnt/home/pigpio/data/adcData.bin" // path and filename to dump buffered ADC data
+#define OUTPUT_DATA "~/pi-sensorer/samples.txt" // path and filename to dump buffered ADC data
 
 /* RPi PIN ASSIGNMENTS */
 #define MISO1 4     // ADC 1 MISO (BCM 4 aka GPIO 4).
