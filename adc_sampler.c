@@ -34,7 +34,7 @@ channel ADC without need for any input to initiate sampling.
 #include <math.h>
 
 /////// USER SHOULD MAKE SURE THESE DEFINES CORRESPOND TO THEIR SETUP ///////
-#define ADCS 1      // Number of connected MCP3201.
+#define ADCS 5     // Number of connected MCP3201.
 
 #define OUTPUT_DATA "samples.bin" // path and filename to dump buffered ADC data
 
@@ -60,7 +60,7 @@ channel ADC without need for any input to initiate sampling.
 
 #define DEFAULT_NUM_SAMPLES 31250 // Default number of samples for printing in the example. Should give 1sec of data at Tp=32us.
 
-int MISO[ADCS]={MISO1}; // Must be updated if you change number of ADCs/MISOs above
+int MISO[ADCS]={MISO1, MISO2, MISO3, MISO4, MISO5}; // Must be updated if you change number of ADCs/MISOs above
 /////// END USER SHOULD MAKE SURE THESE DEFINES CORRESPOND TO THEIR SETUP ///////
 
 /**
