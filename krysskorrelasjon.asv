@@ -1,0 +1,14 @@
+numSamples = 100;
+delay = 12;
+
+signal1 = zeros(1,numSamples);
+signal2 = zeros(1,numSamples);
+
+signal1(1) = 1;
+signal2(delay+1) = 1;
+
+kryssKorr = xcorr(signal1, signal2);
+plot(kryssKorr);
+
+[maxValue, maxPosition] = max(kryssKorr);
+maxPosition2 = abs(maxPosition - (length(kryssKorr)+1)/2);
