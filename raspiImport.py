@@ -6,8 +6,8 @@ def raspiImport(path, channels):
     adcData = np.fromfile(path, dtype="uint16")
     np.delete(adcData, [0, 1, 2, 3])
 
-    sampleNumber = len(adcData) / channels
-    rawData = np.zeros(int(sampleNumber))
+    sampleNumber = int(len(adcData) / channels)
+    rawData = np.zeros(sampleNumber)
     for i in range(0, sampleNumber - 1):
         for j in range(0, channels - 1):
             rawData[i, j] = adcData[i * channels + j]
