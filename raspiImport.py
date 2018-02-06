@@ -5,15 +5,19 @@ def raspiImport(path, channels):
     samplePeriod = np.fromfile(path, dtype="double", count=1) * 1.0e-06
     adcData = np.fromfile(path, dtype="uint16")
     np.delete(adcData, [0, 1, 2, 3])
-
+    
     sampleNumber = int(len(adcData) / channels)
-    rawData = np.zeros(sampleNumber)
-    for i in range(0, sampleNumber - 1):
-        for j in range(0, channels - 1):
-            rawData[i, j] = adcData[i * channels + j]
+    print(len(adcData))
+    print(len(adcData) / channels)
+    print(sampleNumber)
+    
+#   rawData = np.zeros(sampleNumber)
+#    for i in range(0, sampleNumber - 1):
+#        for j in range(0, channels - 1):
+#            rawData[i, j] = adcData[i * channels + j]
 
-    return rawData
-
+#    return rawData
+    return 0
 sampleData = raspiImport("./samples.bin", 5)
 
-print(sampleData[0, 0])
+#print(sampleData[0, 0])
