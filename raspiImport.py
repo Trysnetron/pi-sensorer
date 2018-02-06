@@ -1,17 +1,17 @@
 import numpy as np
 
 def raspiImport(path, channels):
-    with open(path, 'rb') as file:
-        samplePeriod = np.fromfile(path, dtype=float, count=1) * 1.0e-06
-        adcData = np.fromfile(path, dtype=int)
+	with open(path, 'rb') as file:
+        	samplePeriod = np.fromfile(path, dtype=float, count=1) * 1.0e-06
+        	adcData = np.fromfile(path, dtype=int)
+		sampleNumber = len(adcData) / channels
+		rawData = np.zeros(int(sampleNumber))
+		for i in range(0, sampleNumber - 1):
+			for j in range(0, channels - 1):
+				rawData[i, j] = adcData[i * channels + j]
 
-    sampleNumber = len(adcData) / channels
-    rawData = np.zeros(int(sampleNumber))
-    for i in range(0, sampleNumber - 1):
-        for j in range(0, channels - 1):
-            rawData[i, j] = adcData[i * channels + j]
-
-    return rawData
+		return rawData
+	return false
 
 sampleData = raspiImport("./samples.bin", 5)
 
