@@ -72,12 +72,44 @@ y = linspace(0,27720,31250);
 %ylim([0,15000000]);
 %xlabel('Hz');
 
-%fs = 27700;
-%timePeriod = 1/fs;
-%kryssKorr = xcorr(rawData(1), rawData(2));
-%[maxValue, maxPosition] = max(kryssKorr);
-%forsinkelse = abs(maxPosition - (length(kryssKorr)+1)/2);
-%effektivForsinkelse = forsinkelse*timePeriod;
+fs = 27700;
+timePeriod = 1/fs;
+kryssKorr1 = xcorr(rawData(:,3)-2047, rawData(:,4)-2047);
+kryssKorr2 = xcorr(rawData(:,3)-2047, rawData(:,5)-2047);
+kryssKorr3 = xcorr(rawData(:,4)-2047, rawData(:,5)-2047);
+
+[maxValue1, maxPosition1] = max(kryssKorr1);
+forsinkelse1 = abs(maxPosition1 - (length(kryssKorr1)+1)/2);
+%t1 = forsinkelse1*timePeriod;
+
+[maxValue2, maxPosition2] = max(kryssKorr2);
+forsinkelse2 = abs(maxPosition2 - (length(kryssKorr2)+1)/2);
+%t2 = forsinkelse2*timePeriod;
+
+[maxValue3, maxPosition3] = max(kryssKorr3);
+forsinkelse3 = abs(maxPosition3 - (length(kryssKorr3)+1)/2);
+%t3 = forsinkelse3*timePeriod;
+t1 = 0;
+t2 = 0.001;
+t3 = 0.001;
+
+
+teta = atan(sqrt(3)*(t1+t2)/(t1-t2-2*t3));
+tetaDeg = teta*180/pi;
+
+figure
+subplot(3,1,1)   
+plot(kryssKorr1)
+xlim([31200,31300]);
+title('Subplot 1')
+subplot(3,1,2)  
+plot(kryssKorr2)   
+xlim([31200,31300]);
+title('Subplot 2')
+subplot(3,1,3)       
+plot(kryssKorr3)    
+xlim([31200,31300]);
+title('Subplot 3')
 
 
 %%%%% Finish take FFT of data and plot amplitude response %%%%%
