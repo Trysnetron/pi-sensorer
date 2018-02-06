@@ -74,41 +74,42 @@ y = linspace(0,27720,31250);
 
 fs = 27700;
 timePeriod = 1/fs;
-kryssKorr1 = xcorr(rawData(:,3)-2047, rawData(:,4)-2047);
-kryssKorr2 = xcorr(rawData(:,3)-2047, rawData(:,5)-2047);
-kryssKorr3 = xcorr(rawData(:,4)-2047, rawData(:,5)-2047);
+kryssKorr1 = xcorr(rawData(:,4)-2047, rawData(:,3)-2047);
+kryssKorr2 = xcorr(rawData(:,5)-2047, rawData(:,3)-2047);
+kryssKorr3 = xcorr(rawData(:,5)-2047, rawData(:,4)-2047);
 
 [maxValue1, maxPosition1] = max(kryssKorr1);
-forsinkelse1 = abs(maxPosition1 - (length(kryssKorr1)+1)/2);
-%t1 = forsinkelse1*timePeriod;
+forsinkelse1 = maxPosition1 - (length(kryssKorr1)+1)/2;
+t4_3 = forsinkelse1*timePeriod;
 
 [maxValue2, maxPosition2] = max(kryssKorr2);
-forsinkelse2 = abs(maxPosition2 - (length(kryssKorr2)+1)/2);
-%t2 = forsinkelse2*timePeriod;
+forsinkelse2 = maxPosition2 - (length(kryssKorr2)+1)/2;
+t5_3 = forsinkelse2*timePeriod;
 
 [maxValue3, maxPosition3] = max(kryssKorr3);
-forsinkelse3 = abs(maxPosition3 - (length(kryssKorr3)+1)/2);
-%t3 = forsinkelse3*timePeriod;
-t1 = 0;
-t2 = 0.001;
-t3 = 0.001;
+forsinkelse3 = maxPosition3 - (length(kryssKorr3)+1)/2;
+t5_4 = forsinkelse3*timePeriod;
+
+%t1 = 0;
+%t2 = 0.001;
+%t3 = 0.001;
 
 
-teta = atan(sqrt(3)*(t1+t2)/(t1-t2-2*t3));
+teta = atan(sqrt(3)*(t4_3+t5_3)/(t4_3-t5_3-2*t5_4));
 tetaDeg = teta*180/pi;
 
 figure
 subplot(3,1,1)   
 plot(kryssKorr1)
-xlim([31200,31300]);
+xlim([25000,35000]);
 title('Subplot 1')
 subplot(3,1,2)  
 plot(kryssKorr2)   
-xlim([31200,31300]);
+xlim([25000,35000]);
 title('Subplot 2')
 subplot(3,1,3)       
 plot(kryssKorr3)    
-xlim([31200,31300]);
+xlim([25000,35000]);
 title('Subplot 3')
 
 
