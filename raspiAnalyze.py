@@ -4,37 +4,37 @@ from math import sqrt
 from math import pi
 from numpy import random
 from numpy import correlate
-import numpy as np
-import operator
-
-i = 0
-
+from numpy import interp
 
 def main():
-    speedofsound = 34300; #cm/s
-    d = 3.5; #cm
+    speedofsound = 34300 #cm/s
+    d = 3.5 #cm
     maxDelay = d/speedofsound
 
     fs = 27700
     timePeriod = 1/fs
-
+    numSamples = 30
     I = 8
-    
 
-    xq = [i for i in range(1, 31250)]
-    x  = [i for i in range(1, 31250)]
-    
+    x = [i/I for i in range(0, numSamples*I)]
+    xp  = [i for i in range(0, numSamples)]
 
-    mic1 = random.random_sample((31250))+2046.5
-    mic2 = random.random_sample((31250))+2046.5
-    mic3 = random.random_sample((31250))+2046.5
+    mic1 = random.random_sample((numSamples))+2046.5
+    mic1 = interp(x,xp,mic1)
+    mic2 = random.random_sample((numSamples))+2046.5
+    mic2 = interp(x,xp,mic2)
+    mic3 = random.random_sample((numSamples))+2046.5
+    mic3 = interp(x,xp,mic3)
+
+    #for i in range(0, 10):
+    #    print(mic1[i])
 
    
     kryssKorr1 = correlate(mic2-2047, mic1-2047, "same")
     kryssKorr2 = correlate(mic3-2047, mic1-2047, "same")
     kryssKorr3 = correlate(mic3-2047, mic2-2047, "same")
 
-    maxPosition1 = np.argmax(kryssKorr1)
+    maxPosition1 = numpy.argmax(kryssKorr1)
     max_value1 = kryssKorr1[maxPosition1]
     forsinkelse1 = maxPosition1 - (len(kryssKorr1)+1)/2
     t2_1 = forsinkelse1*timePeriod
@@ -49,7 +49,7 @@ def main():
     forsinkelse3 = maxPosition3 - (len(kryssKorr3)+1)/2
     t3_2 = forsinkelse3*timePeriod
 
-    print(max_value1)
+    #print(max_value1)
 
     #for i in range(0, 10):
     #     print(mic1[i])
