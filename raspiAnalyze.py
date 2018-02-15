@@ -5,6 +5,7 @@ from math import pi
 from numpy import random
 from numpy import correlate
 from numpy import interp
+import numpy as np
 
 def main():
     speedofsound = 34300 #cm/s
@@ -21,8 +22,10 @@ def main():
 
     mic1 = random.random_sample((numSamples))+2046.5
     mic1 = interp(x,xp,mic1)
+
     mic2 = random.random_sample((numSamples))+2046.5
     mic2 = interp(x,xp,mic2)
+    
     mic3 = random.random_sample((numSamples))+2046.5
     mic3 = interp(x,xp,mic3)
 
@@ -34,7 +37,7 @@ def main():
     kryssKorr2 = correlate(mic3-2047, mic1-2047, "same")
     kryssKorr3 = correlate(mic3-2047, mic2-2047, "same")
 
-    maxPosition1 = numpy.argmax(kryssKorr1)
+    maxPosition1 = np.argmax(kryssKorr1)
     max_value1 = kryssKorr1[maxPosition1]
     forsinkelse1 = maxPosition1 - (len(kryssKorr1)+1)/2
     t2_1 = forsinkelse1*timePeriod

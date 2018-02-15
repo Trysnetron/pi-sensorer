@@ -67,10 +67,10 @@ title('Raw ADC data');
 
 
 %%%%% Take FFT of data and plot amplitude response %%%%%
-y = linspace(0,27720,31250);
-
-%plot(y,abs(fft(rawData)));
+%y = linspace(0,27720,31250);
+%plot(y,abs(fft(rawData(:,1))));
 %ylim([0,15000000]);
+%xlim([5,1000]);
 %xlabel('Hz');
 
 %mic1[312500];
@@ -118,19 +118,19 @@ else
         tetaDeg = tetaRad*180/pi+270;
 end
 
-figure
-subplot(3,1,1)   
-plot(kryssKorr1)
-xlim([31000,600000]);
-title('Subplot 1')
-subplot(3,1,2)
-plot(kryssKorr2)
-xlim([0,600000]);
-title('Subplot 2')
-subplot(3,1,3)       
-plot(kryssKorr3)    
-xlim([31000,600000]);
-title('Subplot 3')
+%figure
+%subplot(3,1,1)   
+%plot(kryssKorr1)
+%xlim([31000,600000]);
+%title('Subplot 1')
+%subplot(3,1,2)
+%plot(kryssKorr2)
+%xlim([0,600000]);
+%title('Subplot 2')
+%subplot(3,1,3)       
+%plot(kryssKorr3)    
+%xlim([31000,600000]);
+%title('Subplot 3')
 
 
 %%%%% Finish take FFT of data and plot amplitude response %%%%%
