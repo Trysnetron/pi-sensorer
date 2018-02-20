@@ -1,12 +1,19 @@
+import sys
+import subprocess
 import numpy as np
 
-def raspiImport(path, channels):
+assert sys.version_info >= (3, 0)
+
+def sample(path, sample_number):
 	resolution = 4096
+	channels = 5
+	
+	subprocess.run(["sudo", "./adc_sampler", str(sample_number)])
+
 	sample_period = np.fromfile(path, dtype="double", count=1) * 1.0e-06
 	adc_data = np.fromfile(path, dtype="uint16")
 	adc_data = np.delete(adc_data, [0, 1, 2, 3])
 
-	sample_number = int(len(adc_data) / channels)
 	print(str(sample_number) + " samples per channel")
     
 	samples = []
@@ -17,7 +24,3 @@ def raspiImport(path, channels):
 		samples.append(current_channel_samples)
 
 	return samples
-
-sample_data = raspiImport("./samples.bin", 5)
-
-print(sample_data)
