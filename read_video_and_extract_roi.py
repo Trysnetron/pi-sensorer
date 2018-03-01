@@ -22,44 +22,48 @@ import sys
 import cv2
 import numpy as np
 
-#CLI options
+# Constants
+CROP_SIZE = 128
+
+# CLI options
 if len(sys.argv) < 3:
-    print("Select smaller ROI of a video file, and save the mean of each image channel to file, one column per color channel (R, G, B), each row corresponding to a video frame number.")
-    print("")
-    print("Usage:\npython " + sys.argv[0] + " [path to input video file] [path to output data file]")
-    exit()
+	print("Select smaller ROI of a video file, and save the mean of each image channel to file, one column per color channel (R, G, B), each row corresponding to a video frame number.")
+	print("")
+	print("Usage:\npython " + sys.argv[0] + " [path to input video file] [path to output data file]")
+	exit()
 filename = sys.argv[1]
 output_filename = sys.argv[2]
 
-#read video file
+# Read video file
 cap = cv2.VideoCapture(filename, cv2.CAP_FFMPEG)
 if not cap.isOpened():
-    print("Could not open input file. Wrong filename, or your OpenCV package might not be built with FFMPEG support. See docstring of this Python script.")
-    exit()
+	print("Could not open input file. Wrong filename, or your OpenCV package might not be built with FFMPEG support. See docstring of this Python script.")
+	exit()
 
 num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 fps = cap.get(cv2.CAP_PROP_FPS)
 
 mean_signal = np.zeros((num_frames, 3))
 
-#loop through the video
+# Loop through the video
 count = 0
 while cap.isOpened():
-    ret, frame = cap.read() #'frame' is a normal numpy array of dimensions [height, width, 3], in order BGR
-    if not ret:
-        break
+	ret, frame = cap.read() #'frame' is a normal numpy array of dimensions [height, width, 3], in order BGR
+	if not ret:
+		break
 
-    #display window for selection of ROI
-    if count == 0:
-        window_text = 'Select ROI by dragging the mouse, and press SPACE or ENTER once satisfied.'
-        ROI = cv2.selectROI(window_text, frame) #ROI contains: [x, y, w, h] for selected rectangle
-        cv2.destroyWindow(window_text)
-        print("Looping through video.")
+	if count == 0:
+		frame_width = frame.shape[0]
+		frame_height = frame.shape[1]
+		ROI = [int((frame_width - CROP_SIZE) / 2), int((frame_height - CROP_SIZE) / 2), CROP_SIZE, CROP_SIZE]
+	#    window_text = 'Select ROI by dragging the mouse, and press SPACE or ENTER once satisfied.'
+	#    ROI = cv2.selectROI(window_text, frame) #ROI contains: [x, y, w, h] for selected rectangle
+	#    cv2.destroyWindow(window_text)
+		print("Looping through video.")
 
-    #calculate mean
-    cropped_frame = frame[ROI[1]:ROI[1] + ROI[3], ROI[0]:ROI[0] + ROI[2], :]
-    mean_signal[count, :] = np.mean(cropped_frame, axis=(0,1))
-    count = count + 1
+	cropped_frame = frame[ROI[1]:ROI[1] + ROI[3], ROI[0]:ROI[0] + ROI[2], :]
+	mean_signal[count, :] = np.mean(cropped_frame, axis=(0,1))
+	count = count + 1
 
 cap.release()
 
