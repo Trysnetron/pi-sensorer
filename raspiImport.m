@@ -10,7 +10,7 @@ end
 
 %% Read data
 % Make file IDs
-fidAdcData = fopen(strcat(path,'samples.bin'));
+fidAdcData = fopen(strcat(path,'skt7.bin'));
 % Read binary data to local variables
 sample_period = fread(fidAdcData, 1, 'double')*1.0e-06;
 adcData = fread(fidAdcData,'uint16');

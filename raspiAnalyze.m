@@ -47,6 +47,18 @@ end
 
 %% Plot all raw data and corresponding amplitude response
 %%%%% Plot all raw data %%%%%
+for i = 1:4000
+   rawData(i,1)=0; 
+   rawData(i,2)=0; 
+end
+for i = 1:13000
+   rawData(i,1)=0; 
+   rawData(i,2)=0; 
+end
+%for i = 10000:31250
+%   rawData(i,1)=0; 
+%   rawData(i,2)=0; 
+%end
 fh_raw = figure;    % fig handle
 plot(rawData,'-o');
 ylim([0, 4095]) % 12 bit ADC gives values in range [0, 4095]
@@ -58,6 +70,9 @@ for i = 1:channels
 end
 legend(legendStr,'location','best');
 title('Raw ADC data');
+
+
+
 %%%%% Finish plot all raw data %%%%%
 
 
@@ -67,11 +82,11 @@ title('Raw ADC data');
 
 
 %%%%% Take FFT of data and plot amplitude response %%%%%
-%y = linspace(0,27720,31250);
-%plot(y,abs(fft(rawData(:,1))));
-%ylim([0,15000000]);
-%xlim([5,1000]);
-%xlabel('Hz');
+y = linspace(0,27720,31250);
+plot(y,abs(fft(rawData(:,1))));
+ylim([0,15000000]);
+xlim([5,1000]);
+xlabel('Hz');
 
 %mic1[312500];
 I = 8;
