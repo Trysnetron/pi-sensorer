@@ -104,6 +104,8 @@ elif (source_file.endswith(".mp4")):
 
 	mean_signal = np.zeros((sample_num, 3))
 
+	std_pixels = np.zeros(sample_num)
+
 	# Loop through the video
 	count = 0
 	while cap.isOpened():
@@ -121,8 +123,8 @@ elif (source_file.endswith(".mp4")):
 			print("Looping through video.")
 
 		cropped_frame = frame[region_of_interest[1]:region_of_interest[1] + region_of_interest[3], region_of_interest[0]:region_of_interest[0] + region_of_interest[2], :]
-		std = np.std(cropped_frame)
 		mean_signal[count, :] = np.mean(cropped_frame, axis=(0,1))
+		std_pixels[count] = np.mean(cropped_frame[count, :]) / np.std(np.reshape(cropped_frame, CROP_SIZE ^ 2))
 		count = count + 1
 		print("\rFrame " + str(count) + "/" + str(sample_num), end="")
 		
@@ -132,6 +134,8 @@ elif (source_file.endswith(".mp4")):
 	signal_red = mean_signal[:, 2]
 	signal_green = mean_signal[:, 1]
 	signal_blue = mean_signal[:, 0]
+
+	print("Image SNR: " + str(np.mean(std_pixels)))
 
 	if "-save" in sys.argv:
 		output_file = source_file[:-4] + ".txt"
