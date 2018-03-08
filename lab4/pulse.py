@@ -124,7 +124,9 @@ elif (source_file.endswith(".mp4")):
 
 		cropped_frame = frame[region_of_interest[1]:region_of_interest[1] + region_of_interest[3], region_of_interest[0]:region_of_interest[0] + region_of_interest[2], :]
 		mean_signal[count, :] = np.mean(cropped_frame, axis=(0,1))
-		std_pixels[count] = np.mean(cropped_frame[count, :]) / np.std(np.reshape(cropped_frame, CROP_SIZE ^ 2))
+		
+		std_pixels[count] = np.mean(mean_signal[count, :]) / np.std(np.reshape(npcropped_frame, axis=2, (CROP_SIZE ^ 2, 1))
+		
 		count = count + 1
 		print("\rFrame " + str(count) + "/" + str(sample_num), end="")
 		
