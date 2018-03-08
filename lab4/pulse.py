@@ -20,12 +20,16 @@ Requirements:
 """
 import sys
 import numpy as np
+import scipy.signal as sp
 
 # Constants
 CROP_SIZE = 128
 
 BPM_MIN = 30
 BPM_MAX = 300
+
+FILTERCOEFF_B = [0.000584808959313734, 0, -0.00292404479656867, 0, 0.00584808959313734, 0, -0.00584808959313734, 0, 0.00292404479656867, 0, -0.000584808959313734]
+FILTERCOEFF_A = [1, -8.11046958062840, 29.8131945012003, -65.4556964567726, 95.1077992782570, -95.5983105187336, 67.3343241904181, -32.8187622910838, 10.5936439430283, -2.04499091857572, 0.179267963171780]
 
 # Variables
 source_file = ""
@@ -124,8 +128,8 @@ elif (source_file.endswith(".mp4")):
 
 		cropped_frame = frame[region_of_interest[1]:region_of_interest[1] + region_of_interest[3], region_of_interest[0]:region_of_interest[0] + region_of_interest[2], :]
 		mean_signal[count, :] = np.mean(cropped_frame, axis=(0,1))
+		
 		mean_pixels = np.mean(cropped_frame, axis=2)
-
 		std_pixels[count] = np.mean(mean_signal[count, :]) / np.std(mean_pixels)
 		
 		count = count + 1
@@ -153,34 +157,40 @@ else:
 ##### Analyze data #####
 ########################
 
-# Standard deviation
-sd_red = np.std(signal_red)
-sd_green = np.std(signal_green)
-sd_blue = np.std(signal_blue)
-print("Standard deviations: r:" + str(sd_red) + " g: " + str(sd_green) + " b: " + str(sd_blue))
+# Filters the signal through a band pass filter
+# Design band pass filter
+nyq = sample_rate / 2
+low = 30 / 60 / nyq
+high = 230 / 60 / nyq
+b, a = sp.butter(5, [low, high], btype='band')
+filtered_signal_red = sp.lfilter(b, a, signal_red)
+filtered_signal_green = sp.lfilter(b, a, signal_green)
+filtered_signal_blue = sp.lfilter(b, a, signal_blue)
 
-# rms (mean)
-mean_red = np.mean(signal_red)
-mean_green = np.mean(signal_green)
-mean_blue = np.mean(signal_blue)
-print("RMS: r:" + str(mean_red) + " g: " + str(mean_green) + " b: " + str(mean_blue))
+std_signal_red = np.std(filtered_signal_red)
+std_signal_green = np.std(filtered_signal_green)
+std_signal_blue = np.std(filtered_signal_blue)
 
-print("-- Image quality SNR --\nr: " + str(mean_red/sd_red) + " g: " + str(mean_green / sd_green) + " b: " + str(mean_blue / sd_blue))
+std_noise_red = np.std(hpfilter(filtered_signal_red))
+std_noise_green = np.std(hpfilter(filtered_signal_green))
+std_noise_blue = np.std(hpfilter(filtered_signal_blue))
 
-# Filters the signal through a high pass filter
-filtered_signal_red = hpfilter(signal_red)
-filtered_signal_green = hpfilter(signal_green)
-filtered_signal_blue = hpfilter(signal_blue)
+snr_red = std_signal_red / std_noise_red
+snr_green = std_signal_green / std_noise_green
+snr_blue = std_signal_blue / std_noise_blue
 
-#autocorr_red = autocorrelation(filtered_signal_red)
-#autocorr_green = autocorrelation(filtered_signal_green)
-#autocorr_blue = autocorrelation(filtered_signal_blue)
+print("-- Pulse SNR --")
+print("Red: " + str(snr_red))
+print("Green: " + str(snr_green))
+print("Blue: " + str(snr_blue))
+print("Average: " + str((snr_red + snr_green + snr_blue) / 3))
 
 spectrum_red = spectrum(filtered_signal_red)
 spectrum_green = spectrum(filtered_signal_green)
 spectrum_blue = spectrum(filtered_signal_blue)
 spectrum_length = len(spectrum_red)
 spectrum_range = np.zeros(len(spectrum_red))
+
 peak_red = np.argmax(spectrum_red)
 peak_green = np.argmax(spectrum_green)
 peak_blue = np.argmax(spectrum_blue)
@@ -192,14 +202,6 @@ print("Blue pulse: " + str(spectrumIndexToBPM(peak_blue, spectrum_length, sample
 peak_height_red = spectrum(signal_red)[peak_red]
 print("Pulse signal amplitude (red): " + str(peak_height_red * 2))
 
-cropped_spectrum_red = spectrum_red[int(BPM_MIN * spectrum_length * 2 / sample_rate / 60):int(BPM_MAX * spectrum_length * 2 / sample_rate / 60)]
-cropped_spectrum_green = spectrum_green[int(BPM_MIN * spectrum_length * 2 / sample_rate / 60):int(BPM_MAX * spectrum_length * 2 / sample_rate / 60)]
-cropped_spectrum_blue = spectrum_blue[int(BPM_MIN * spectrum_length * 2 / sample_rate / 60):int(BPM_MAX * spectrum_length * 2 / sample_rate / 60)]
-cropped_spectrum_length = len(cropped_spectrum_red)
-cropped_spectrum_range = np.zeros(cropped_spectrum_length)
-for i in range(0, cropped_spectrum_length):
-	cropped_spectrum_range[i] = i * (BPM_MAX - BPM_MIN) / cropped_spectrum_length + BPM_MIN
-
 if "-plot" in sys.argv:
 	try:
 		import matplotlib.pyplot as pp
@@ -207,19 +209,25 @@ if "-plot" in sys.argv:
 		print("You need matplotlib to plot.")
 		exit()
 
-	pp.subplot(321)
+	pp.subplot(331)
 	pp.plot(signal_red, "r")
-	pp.subplot(322)
+	pp.subplot(332)
+	pp.plot(filtered_signal_red, "r")
+	pp.subplot(333)
 	pp.plot(spectrum_red, "r")
 	
-	pp.subplot(323)
+	pp.subplot(334)
 	pp.plot(signal_green, "g")
-	pp.subplot(324)
+	pp.subplot(335)
+	pp.plot(filtered_signal_green, "g")
+	pp.subplot(336)
 	pp.plot(spectrum_green, "g")
 	
-	pp.subplot(325)
+	pp.subplot(337)
 	pp.plot(signal_blue, "b")
-	pp.subplot(326)
+	pp.subplot(338)
+	pp.plot(filtered_signal_blue, "b")
+	pp.subplot(339)
 	pp.plot(spectrum_blue, "b")
 	
 	pp.show()
