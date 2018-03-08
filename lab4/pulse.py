@@ -157,15 +157,16 @@ else:
 ##### Analyze data #####
 ########################
 
-# Filters the signal through a band pass filter
 # Design band pass filter
 nyq = sample_rate / 2
 low = 30 / 60 / nyq
 high = 230 / 60 / nyq
 b, a = sp.butter(5, [low, high], btype='band')
-filtered_signal_red = sp.lfilter(b, a, signal_red)
-filtered_signal_green = sp.lfilter(b, a, signal_green)
-filtered_signal_blue = sp.lfilter(b, a, signal_blue)
+
+# Removes DC-level and filters the signal with previously designed filter.
+filtered_signal_red = sp.lfilter(b, a, signal_red - np.mean(signal_red))
+filtered_signal_green = sp.lfilter(b, a, signal_green - np.mean(signal_green))
+filtered_signal_blue = sp.lfilter(b, a, signal_blue - np.mean(signal_blue))
 
 std_signal_red = np.std(filtered_signal_red)
 std_signal_green = np.std(filtered_signal_green)
@@ -189,18 +190,15 @@ spectrum_red = spectrum(filtered_signal_red)
 spectrum_green = spectrum(filtered_signal_green)
 spectrum_blue = spectrum(filtered_signal_blue)
 spectrum_length = len(spectrum_red)
-spectrum_range = np.zeros(len(spectrum_red))
 
 peak_red = np.argmax(spectrum_red)
 peak_green = np.argmax(spectrum_green)
 peak_blue = np.argmax(spectrum_blue)
 
-print("Red pulse: " + str(spectrumIndexToBPM(peak_red, spectrum_length, sample_rate)) + " BPM")
-print("Green pulse: " + str(spectrumIndexToBPM(peak_green, spectrum_length, sample_rate)) + " BPM")
-print("Blue pulse: " + str(spectrumIndexToBPM(peak_blue, spectrum_length, sample_rate)) + " BPM")
-
-peak_height_red = spectrum(signal_red)[peak_red]
-print("Pulse signal amplitude (red): " + str(peak_height_red * 2))
+print("-- Pulse --")
+print("Red: " + str(spectrumIndexToBPM(peak_red, spectrum_length, sample_rate)) + " BPM")
+print("Green: " + str(spectrumIndexToBPM(peak_green, spectrum_length, sample_rate)) + " BPM")
+print("Blue: " + str(spectrumIndexToBPM(peak_blue, spectrum_length, sample_rate)) + " BPM")
 
 if "-plot" in sys.argv:
 	try:
