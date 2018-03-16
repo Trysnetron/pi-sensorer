@@ -168,27 +168,7 @@ filtered_signal_red = sp.lfilter(b, a, signal_red - np.mean(signal_red))
 filtered_signal_green = sp.lfilter(b, a, signal_green - np.mean(signal_green))
 filtered_signal_blue = sp.lfilter(b, a, signal_blue - np.mean(signal_blue))
 
-std_signal_red = np.std(filtered_signal_red)
-std_signal_green = np.std(filtered_signal_green)
-std_signal_blue = np.std(filtered_signal_blue)
-
-std_noise_red = np.std(hpfilter(filtered_signal_red))
-std_noise_green = np.std(hpfilter(filtered_signal_green))
-std_noise_blue = np.std(hpfilter(filtered_signal_blue))
-
-snr_red = snr_green = snr_blue = 0
-if not std_noise_red == 0:
-	snr_red = std_signal_red / std_noise_red
-if not std_noise_green == 0:
-	snr_green = std_signal_green / std_noise_green
-if not std_noise_blue == 0:
-	snr_blue = std_signal_blue / std_noise_blue
-
-print("-- Pulse SNR --")
-print("Red: " + str(snr_red))
-print("Green: " + str(snr_green))
-print("Blue: " + str(snr_blue))
-
+# Puls
 auto_red = autocorrelation(filtered_signal_red)
 auto_green = autocorrelation(filtered_signal_green)
 auto_blue = autocorrelation(filtered_signal_blue)
@@ -206,6 +186,45 @@ print("-- Pulse --")
 print("Red: " + str(bpm_red) + " BPM")
 print("Green: " + str(bpm_green) + " BPM")
 print("Blue: " + str(bpm_blue) + " BPM")
+
+# Signal-Noise-Ratio
+peak_height_red = np.max(spectrum_red)
+peak_height_green = np.max(spectrum_green)
+peak_height_blue = np.max(spectrum_blue)
+
+average_energy_red = np.mean(spectrum_red)
+average_energy_green = np.mean(spectrum_green)
+average_energy_blue = np.mean(spectrum_blue)
+
+
+std_signal_red = np.std(filtered_signal_red)
+std_signal_green = np.std(filtered_signal_green)
+std_signal_blue = np.std(filtered_signal_blue)
+
+std_noise_red = np.std(hpfilter(filtered_signal_red))
+std_noise_green = np.std(hpfilter(filtered_signal_green))
+std_noise_blue = np.std(hpfilter(filtered_signal_blue))
+
+snr_red = snr_green = snr_blue = old_snr_red = old_snr_green = old_snr_blue = 0
+
+if not std_noise_red == 0:
+	old_snr_red = std_signal_red / std_noise_red
+if not std_noise_green == 0:
+	old_snr_green = std_signal_green / std_noise_green
+if not std_noise_blue == 0:
+	old_snr_blue = std_signal_blue / std_noise_blue
+
+if not average_energy_red == 0:
+	snr_red = peak_height_red / average_energy_red
+if not average_energy_green == 0:
+	snr_green = peak_height_green / average_energy_green
+if not average_energy_blue == 0:
+	snr_blue = peak_height_blue / average_energy_blue
+
+print("-- Pulse SNR --")
+print("Red: " + str(snr_red) + " (old: " + str(old_snr_red) + ")")
+print("Green: " + str(snr_green) + " (old: " + str(old_snr_green) + ")")
+print("Blue: " + str(snr_blue) + " (old: " + str(old_snr_blue) + ")")
 
 print("-- Conclusion --")
 best_color = ""
