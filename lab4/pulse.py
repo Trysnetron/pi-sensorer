@@ -1,13 +1,12 @@
 """
-Read the input video file, display first frame and ask the user to select a
-region of interest.  Will then calculate the mean of each frame within the ROI,
-and return the means of each frame, for each color channel, which is written to
-file.
+##################
+#### Pulse.py ####
+##################
 
-Similar to read_video_and_extract_roi.m, but for Python.
+Based on read_video_and_extract_roi.py
+Gives estimate of pulse from either video file or text file
 
 Requirements:
-
 * Probably ffmpeg. Install it through your package manager.
 * numpy
 * OpenCV python package.
@@ -17,7 +16,11 @@ Requirements:
     install them (locally for your user) using pip:
     - pip install opencv-python
     - (or pip3 install opencv-python)
+* pyplot
+	Required when using the -plot option
+* scipy
 """
+
 import sys
 import numpy as np
 import scipy.signal as sp
@@ -26,10 +29,7 @@ import scipy.signal as sp
 CROP_SIZE = 128
 
 BPM_MIN = 30
-BPM_MAX = 300
-
-FILTERCOEFF_B = [0.000584808959313734, 0, -0.00292404479656867, 0, 0.00584808959313734, 0, -0.00584808959313734, 0, 0.00292404479656867, 0, -0.000584808959313734]
-FILTERCOEFF_A = [1, -8.11046958062840, 29.8131945012003, -65.4556964567726, 95.1077992782570, -95.5983105187336, 67.3343241904181, -32.8187622910838, 10.5936439430283, -2.04499091857572, 0.179267963171780]
+BPM_MAX = 230
 
 # Variables
 source_file = ""
@@ -176,29 +176,50 @@ std_noise_red = np.std(hpfilter(filtered_signal_red))
 std_noise_green = np.std(hpfilter(filtered_signal_green))
 std_noise_blue = np.std(hpfilter(filtered_signal_blue))
 
-snr_red = std_signal_red / std_noise_red
-snr_green = std_signal_green / std_noise_green
-snr_blue = std_signal_blue / std_noise_blue
+snr_red = snr_green = snr_blue = 0
+if not std_noise_red == 0:
+	snr_red = std_signal_red / std_noise_red
+if not std_noise_green == 0:
+	snr_green = std_signal_green / std_noise_green
+if not std_noise_blue == 0:
+	snr_blue = std_signal_blue / std_noise_blue
 
 print("-- Pulse SNR --")
 print("Red: " + str(snr_red))
 print("Green: " + str(snr_green))
 print("Blue: " + str(snr_blue))
-print("Average: " + str((snr_red + snr_green + snr_blue) / 3))
 
-spectrum_red = spectrum(filtered_signal_red)
-spectrum_green = spectrum(filtered_signal_green)
-spectrum_blue = spectrum(filtered_signal_blue)
+auto_red = autocorrelation(filtered_signal_red)
+auto_green = autocorrelation(filtered_signal_green)
+auto_blue = autocorrelation(filtered_signal_blue)
+
+spectrum_red = spectrum(auto_red)
+spectrum_green = spectrum(auto_green)
+spectrum_blue = spectrum(auto_blue)
 spectrum_length = len(spectrum_red)
 
-peak_red = np.argmax(spectrum_red)
-peak_green = np.argmax(spectrum_green)
-peak_blue = np.argmax(spectrum_blue)
+bpm_red = spectrumIndexToBPM(np.argmax(spectrum_red), spectrum_length, sample_rate)
+bpm_green = spectrumIndexToBPM(np.argmax(spectrum_green), spectrum_length, sample_rate)
+bpm_blue = spectrumIndexToBPM(np.argmax(spectrum_blue), spectrum_length, sample_rate)
 
 print("-- Pulse --")
-print("Red: " + str(spectrumIndexToBPM(peak_red, spectrum_length, sample_rate)) + " BPM")
-print("Green: " + str(spectrumIndexToBPM(peak_green, spectrum_length, sample_rate)) + " BPM")
-print("Blue: " + str(spectrumIndexToBPM(peak_blue, spectrum_length, sample_rate)) + " BPM")
+print("Red: " + str(bpm_red) + " BPM")
+print("Green: " + str(bpm_green) + " BPM")
+print("Blue: " + str(bpm_blue) + " BPM")
+
+print("-- Conclusion --")
+best_color = ""
+best_bpm = ""
+if (snr_red > snr_green and snr_red > snr_blue):
+	best_color = "red"
+	best_bpm = bpm_red
+elif (snr_green > snr_red and snr_green > snr_blue):
+	best_color = "green"
+	best_bpm = bpm_green
+else:
+	best_color = "blue"
+	best_bpm = bpm_blue
+print("Based on signal-to-noise ratio, " + best_color + " seems to be the best estimate, with " + str(best_bpm) + " BPM.")
 
 if "-plot" in sys.argv:
 	try:
@@ -207,31 +228,33 @@ if "-plot" in sys.argv:
 		print("You need matplotlib to plot.")
 		exit()
 
-	pp.subplot(331)
+	pp.subplot(3, 4, 1)
 	pp.plot(signal_red, "r")
-	pp.subplot(332)
+	pp.subplot(3, 4, 2)
 	pp.plot(filtered_signal_red, "r")
-	pp.subplot(333)
+	pp.subplot(3, 4, 3)
+	pp.plot(auto_red, "r")
+	pp.subplot(3, 4, 4)
 	pp.plot(spectrum_red, "r")
 	
-	pp.subplot(334)
+	pp.subplot(3, 4, 5)
 	pp.plot(signal_green, "g")
-	pp.subplot(335)
+	pp.subplot(3, 4, 6)
 	pp.plot(filtered_signal_green, "g")
-	pp.subplot(336)
+	pp.subplot(3, 4, 7)
+	pp.plot(auto_green, "g")
+	pp.subplot(3, 4, 8)
 	pp.plot(spectrum_green, "g")
 	
-	pp.subplot(337)
+	pp.subplot(3, 4, 9)
 	pp.plot(signal_blue, "b")
-	pp.subplot(338)
+	pp.subplot(3, 4, 10)
 	pp.plot(filtered_signal_blue, "b")
-	pp.subplot(339)
+	pp.subplot(3, 4, 11)
+	pp.plot(auto_blue, "b")
+	pp.subplot(3, 4, 12)
 	pp.plot(spectrum_blue, "b")
 	
 	pp.show()
 
 print("Done")
-
-#save to file in order R, G, B.
-#np.savetxt(output_filename, np.flip(mean_signal, 1))
-#print("Data saved to '" + output_filename + "', fps = " + str(fps) + " frames/second")
